@@ -1,15 +1,20 @@
 {
   "name": "jsaqa_3_2",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "playwright"
+    "test": "playwright test",
+    "write": "playwright codegen netology.ru --output writed_test.js",
+    "help": "playwright --help"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.12.3",
-    "playwright": "^1.12.3"
-  }
+    "@playwright/test": "^1.32",
+    "playwright": "^1.32.0"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "description": ""
 }

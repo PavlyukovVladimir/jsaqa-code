@@ -145,3 +145,4 @@ dist
 
 .vscode
 */node_modules/
+7.3/playwright/user.js
