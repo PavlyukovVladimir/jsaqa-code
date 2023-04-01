@@ -2,7 +2,7 @@ let page;
 
 beforeEach(async () => {
   page = await browser.newPage();
-  await page.goto("https://github.com/team", { timeout: 100_000 });
+  await page.goto("https://github.com/team");
 });
 
 afterEach(() => {
@@ -16,12 +16,12 @@ describe("Github page tests", () => {
     await page.waitForSelector("h1");
     const title2 = await page.title();
     expect(title2).toEqual("GitHub: Where the world builds software · GitHub");
-  });
+  }, 100_000);
 
   test("The first link attribute", async () => {
     const actual = await page.$eval("a", (link) => link.getAttribute("href"));
     expect(actual).toEqual("#start-of-content");
-  });
+  }, 100_000);
 
   test("The page contains Sign in button", async () => {
     const btnSelector = ".btn-large-mktg.btn-mktg";
@@ -30,5 +30,5 @@ describe("Github page tests", () => {
     });
     const actual = await page.$eval(btnSelector, (link) => link.textContent);
     expect(actual).toContain("Sign up for free");
-  });
+  }, 100_000);
 });
