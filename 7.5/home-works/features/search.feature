@@ -1,9 +1,4 @@
-Feature: Search a course
-    @skip
-    Scenario: Should search by text
-        Given user is on "/navigation" page
-        When user search by "тестировщик"
-        Then user sees the course suggested "Тестировщик ПО"
+Feature: Booking tickets
 
     Scenario: booking tickets after the current day
         Given user is on main page of tmweb

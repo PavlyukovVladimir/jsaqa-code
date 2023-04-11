@@ -12,7 +12,6 @@ const {
   setDefaultTimeout,
 } = require("@cucumber/cucumber");
 const {
-  putText,
   getText,
   getFreeChairs,
   getSeances,
@@ -44,13 +43,6 @@ After(async function () {
 // #endregion Before/after
 // #region Given
 
-// Переход на страницу Нетологии с заданным относительным адресом
-Given("user is on {string} page", async function (string) {
-  return await this.page.goto(`https://netology.ru${string}`, {
-    setTimeout: 30000,
-  });
-});
-
 // Переход на страницу афиши
 Given("user is on main page of tmweb", async function () {
   return await this.page.goto(`http://qamid.tmweb.ru/client/index.php`, {
@@ -60,11 +52,6 @@ Given("user is on main page of tmweb", async function () {
 
 // #endregion Given
 // #region When
-
-// Уогда пользователь ищет определенный текст
-When("user search by {string}", async function (string) {
-  return await putText(this.page, "[class*=Navigation] input", string);
-});
 
 // Когда пользователь случайным образом выбирает день не позднее заданного
 When(
@@ -152,13 +139,6 @@ When("user will confirm the booking", async function () {
 
 // #endregion When
 // #region Then
-
-// Тогда пользователь видит заданный предложенный курс
-Then("user sees the course suggested {string}", async function (string) {
-  const actual = await getText(this.page, "a[data-name]");
-  const expected = await string;
-  expect(actual).contains(expected);
-});
 
 // Тогда пользователь видит афишу выбранного дня
 Then("user sees the poster of the selected day", async function () {
