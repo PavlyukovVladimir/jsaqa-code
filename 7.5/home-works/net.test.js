@@ -1,14 +1,14 @@
-var Home = require("./pages/home.js");
-var ChairsChoice = require("./pages/chairs-choice.js");
+var Home = require("./lib/pages/home");
+var ChairsChoice = require("./lib/pages/chairs-choice");
 const {
   clickElement,
   putText,
-  getText,
+  getTextBySelector,
   getFreeChairs,
   getSeances,
   getChairs,
-} = require("./lib/commands.js");
-const { getCurrentDayTimestamp } = require("./lib/util.js");
+} = require("./lib/commands");
+const { getCurrentDayTimestamp } = require("./lib/util");
 
 const { expect } = require("chai");
 
@@ -28,8 +28,9 @@ describe("task1", () => {
 
   beforeEach(async () => {
     page = await browser.newPage();
-    // await page.goto("http://qamid.tmweb.ru/client/index.php");
-    // await page.waitForSelector(".page-nav a");
+    await page.goto("http://qamid.tmweb.ru/client/index.php");
+    await page.waitForSelector(".page-nav a");
+    
   });
 
   test("Current day ticket booking", async () => {
@@ -52,7 +53,7 @@ describe("task1", () => {
       ).click();
       await page.waitForSelector(".buying-scheme__row");
 
-      const actual1 = await getText(page, ".buying__info-start");
+      const actual1 = await getTextBySelector(page, ".buying__info-start");
       expect(actual1).contain("Начало сеанса");
 
       // получить места
@@ -77,7 +78,7 @@ describe("task1", () => {
       // дождаться появления заголовка блока проверки билетов
       await page.waitForSelector("h2.ticket__check-title");
 
-      const actual2 = await getText(page, "h2.ticket__check-title");
+      const actual2 = await getTextBySelector(page, "h2.ticket__check-title");
       expect(actual2).contain("Вы выбрали билеты");
 
       // кликнуть кнопку бронирования
@@ -85,7 +86,7 @@ describe("task1", () => {
       // дождаться появления QR картинки
       await page.waitForSelector("img.ticket__info-qr");
 
-      const actual3 = await getText(page, "h2.ticket__check-title");
+      const actual3 = await getTextBySelector(page, "h2.ticket__check-title");
       expect(actual3).contain("Электронный билет");
     }
   });
@@ -146,7 +147,7 @@ describe("task1", () => {
       ).click();
       await page.waitForSelector(".buying-scheme__row");
 
-      const actual1 = await getText(page, ".buying__info-start");
+      const actual1 = await getTextBySelector(page, ".buying__info-start");
       expect(actual1).contain("Начало сеанса");
 
       // получить места
@@ -171,7 +172,7 @@ describe("task1", () => {
       // дождаться появления заголовка блока проверки билетов
       await page.waitForSelector("h2.ticket__check-title");
 
-      const actual2 = await getText(page, "h2.ticket__check-title");
+      const actual2 = await getTextBySelector(page, "h2.ticket__check-title");
       expect(actual2).contain("Вы выбрали билеты");
 
       // кликнуть кнопку бронирования
@@ -179,18 +180,17 @@ describe("task1", () => {
       // дождаться появления QR картинки
       await page.waitForSelector("img.ticket__info-qr");
 
-      const actual3 = await getText(page, "h2.ticket__check-title");
+      const actual3 = await getTextBySelector(page, "h2.ticket__check-title");
       expect(actual3).contain("Электронный билет");
     }
   });
 
-  test.skip("test", async () => {
+  test.only("test", async () => {
     const homePage = new Home(page, "http://qamid.tmweb.ru/client/index.php");
     await homePage.goToHomePage();
     await homePage.checkHomePage();
-    await homePage.randomlySelectWeekDay();
+    // await homePage.randomlySelectWeekDay();
     await homePage.checkSelectedWeekDay();
-    const chairsChoicePage = await homePage.selectSeance(1);
-    // await chairsChoicePage.checkChairsChoicePage();
+    console.log(await homePage.getSeances(false));
   });
 });

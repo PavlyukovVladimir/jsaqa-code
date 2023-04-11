@@ -39,4 +39,16 @@ module.exports = {
 
     return array;
   },
+
+  boolFlagCheck(flag, value, match){
+    if (flag === false) {
+      return false;
+    }
+    if (value !== true && value !== false) {
+      return true;
+    } else if (value === match) {
+      return true;
+    }
+    return false;
+  }
 };

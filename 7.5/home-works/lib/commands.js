@@ -9,12 +9,28 @@ module.exports = {
     }
   },
 
-  getText: async function (page, selector) {
+  getTextBySelector: async function (page, selector) {
     try {
       await page.waitForSelector(selector);
       return await page.$eval(selector, (link) => link.textContent);
     } catch (error) {
       throw new Error(`Text is not available for selector: ${selector}`);
+    }
+  },
+
+  getText: async function (element) {
+    try {
+      return (await element.getProperty('textContent')).jsonValue();
+    } catch (error) {
+      throw new Error(`Text is not available for this element: ${element}`);
+    }
+  },
+
+  getClassName: async function (element) {
+    try {
+      return (await element.getProperty('className')).jsonValue();
+    } catch (error) {
+      throw new Error(`Text is not available for this element: ${element}`);
     }
   },
 
@@ -49,7 +65,9 @@ module.exports = {
       let rows = document.querySelectorAll(".buying-scheme__row");
       let length = rows.length;
       for (let i = 0; i < length; i++) {
-        rows = document.querySelectorAll(`.buying-scheme__row:nth-child(${i + 1}) .buying-scheme__chair`);
+        rows = document.querySelectorAll(
+          `.buying-scheme__row:nth-child(${i + 1}) .buying-scheme__chair`
+        );
         let trow = [];
 
         for (let j = 0; j < rows.length; j++) {
