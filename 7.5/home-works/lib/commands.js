@@ -19,19 +19,28 @@ module.exports = {
   },
 
   getText: async function (element) {
-    try {
-      return (await element.getProperty('textContent')).jsonValue();
-    } catch (error) {
-      throw new Error(`Text is not available for this element: ${element}`);
-    }
+      return await (await element.getProperty("textContent")).jsonValue();
   },
 
   getClassName: async function (element) {
-    try {
-      return (await element.getProperty('className')).jsonValue();
-    } catch (error) {
-      throw new Error(`Text is not available for this element: ${element}`);
-    }
+      return await (await element.getProperty("className")).jsonValue();
+  },
+
+  getElementAttribute: async function (element, attributeName) {
+    return await element.evaluate((el) => el.getAttribute(attributeName));
+  },
+
+  hasElementAttribute: async function (element, attributeName) {
+    return await element.evaluate((el) => el.hasAttribute(attributeName));
+  },
+
+  getElementProperty: async function (element, proprtyName) {
+    return await (await element.getProperty(proprtyName)).jsonValue();
+  },
+
+  hasElementProperty: async function (element, proprtyName) {
+    const properties = await element.getProperties();
+    return properties.includes(proprtyName);
   },
 
   putText: async function (page, selector, text) {

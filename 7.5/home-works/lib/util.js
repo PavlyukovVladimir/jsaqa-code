@@ -20,6 +20,7 @@ module.exports = {
   dayShift(timestamp, days) {
     return Math.floor(timestamp + days * 24 * 60 * 60);
   },
+
   shuffle(array) {
     // Перемешивает элементы массива
     let m = array.length,
@@ -50,5 +51,9 @@ module.exports = {
       return true;
     }
     return false;
+  },
+
+  getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min) ) + min;
   }
 };

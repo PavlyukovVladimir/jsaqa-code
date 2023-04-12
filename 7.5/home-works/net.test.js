@@ -1,5 +1,8 @@
-var Home = require("./lib/pages/home");
-var ChairsChoice = require("./lib/pages/chairs-choice");
+var HomePage = require("./lib/pages/home.page");
+var ChairsChoicePage = require("./lib/pages/chairs-choice.page");
+var ViewBookingPage = require("./lib/pages/view-booking.page");
+var QRPage = require("./lib/pages/qr.page");
+
 const {
   clickElement,
   putText,
@@ -30,7 +33,7 @@ describe("task1", () => {
     page = await browser.newPage();
     await page.goto("http://qamid.tmweb.ru/client/index.php");
     await page.waitForSelector(".page-nav a");
-    
+    // (await page.$("")).getProperties()
   });
 
   test("Current day ticket booking", async () => {
@@ -186,11 +189,16 @@ describe("task1", () => {
   });
 
   test.only("test", async () => {
-    const homePage = new Home(page, "http://qamid.tmweb.ru/client/index.php");
-    await homePage.goToHomePage();
-    await homePage.checkHomePage();
+    const homePage = new HomePage(page, "http://qamid.tmweb.ru/client/index.php");
+    await homePage.goToPage();
+    await homePage.checkPage();
     // await homePage.randomlySelectWeekDay();
     await homePage.checkSelectedWeekDay();
-    console.log(await homePage.getSeances(false));
+    const chairsChoicePage = await homePage.randomlySelectSeance(true);
+    await chairsChoicePage.checkPage();
+    const chair = await chairsChoicePage.getRandomFreeChair();
+    await chairsChoicePage.selectChairs(chair);
+    const viewBookingPage = await chairsChoicePage.pressBookButton();
+    await viewBookingPage.checkPage();
   });
 });

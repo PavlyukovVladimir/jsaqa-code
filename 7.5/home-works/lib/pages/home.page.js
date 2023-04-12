@@ -1,14 +1,14 @@
 "use strict";
 
 const { expect } = require("chai");
-var ChairsChoice = require("./chairs-choice");
+var ChairsChoicePage = require("./chairs-choice.page");
 const { getTextBySelector, getText, getClassName } = require("../commands");
-const { boolFlagCheck } = require("../util");
+const { boolFlagCheck, getRndInteger } = require("../util");
 
 const pageNavigationSelector = ".page-nav a";
 const weekDaysSelector = ".page-nav__day";
-const selectedDaySelector = ".page-nav__day.page-nav__day_chosen";
-const currentDaySelector = ".page-nav__day.page-nav__day_today";
+const selectedDayClassName = "page-nav__day_chosen";
+const currentDayClassName = "page-nav__day_today";
 const movieSelector = ".movie";
 const movieTitleSelector = ".movie__description .movie__title";
 const hallSelector = ".movie-seances__hall";
@@ -16,7 +16,7 @@ const hallTitleSelector = ".movie-seances__hall-title";
 const timeSelector = ".movie-seances__time";
 const timeDisabledClassName = "acceptin-button-disabled";
 
-class Home {
+class HomePage {
   page;
   baseUrl;
   selectedWeekDayNumber;
@@ -26,23 +26,23 @@ class Home {
     this.baseUrl = baseUrl;
   }
 
-  async goToHomePage() {
+  async goToPage() {
     await this.page.goto(this.baseUrl);
-    await this.checkHomePage();
+    await this.checkPage();
     this.selectedWeekDayNumber = 1;
     return this;
   }
 
-  async checkHomePage() {
+  async checkPage() {
     await this.page.waitForSelector(pageNavigationSelector);
     expect(await this.page.$$(weekDaysSelector)).to.have.lengthOf(7);
     return this;
   }
 
   async selectWeekDay(num) {
-    const selector = `${pageNavigationSelector}:nth-of-type(${num})`;
-    await this.page.waitForSelector(selector);
-    await this.page.click(selector);
+    await this.page.waitForSelector(pageNavigationSelector);
+    const elements = await this.page.$$(pageNavigationSelector);
+    await elements[num].click();
     this.selectedWeekDayNumber = num;
     return this;
   }
@@ -54,18 +54,29 @@ class Home {
   }
 
   async checkSelectedWeekDay() {
-    await this.page.waitForSelector(
-      `${pageNavigationSelector}:nth-of-type(${this.selectedWeekDayNumber}).page-nav__day_chosen`
-    );
+    await this.page.waitForSelector(pageNavigationSelector);
+    const elements = await this.page.$$(pageNavigationSelector);
+    const element = await elements[this.selectedWeekDayNumber - 1];
+    const className = await getClassName(element);
+    expect(className).to.contain(selectedDayClassName);
+    return this;
+  }
+
+  async checkCurrentWeekDay() {
+    await this.page.waitForSelector(pageNavigationSelector);
+    const elements = await this.page.$$(pageNavigationSelector);
+    const element = await elements[this.selectedWeekDayNumber - 1];
+    const className = await getClassName(element);
+    expect(className).to.contain(currentDayClassName);
     return this;
   }
 
   /**
    *
-   * @param {*} status if false returns only the disable seances, if true - only the active, other - both
+   * @param {*} isAvailable if false returns only the disable seances, if true - only the active, other - both
    * @returns
    */
-  async getSeances(status) {
+  async getSeances(isAvailable) {
     let arr = [];
     let i = 0;
     const movies = await this.page.$$(movieSelector);
@@ -90,7 +101,7 @@ class Home {
             nth: ++i,
             isActive,
           };
-          if (boolFlagCheck(true, status, isActive)) {
+          if (boolFlagCheck(true, isAvailable, isActive)) {
             arr.push(seance);
           }
           // console.log(arr[arr.length - 1]);
@@ -100,18 +111,30 @@ class Home {
     return arr;
   }
 
-  async selectSeance(num, status) {
-    let seances = await this.getSeances(status);
-    if (num > seances.length) {
-      throw new Error(
-        `Not enouth seances it count ${seances.length}, needs ${num} or gretter`
-      );
-    }
-    await this.page.click(
-      timeSelector + `:nth-of-type(${seances[num - 1].nth})`
-    );
-    return new ChairsChoice(this.page, seances[num - 1]);
+  async selectSeanceWithDisableCheck(seance) {
+    await this.page.waitForSelector(timeSelector);
+    const elements = await this.page.$$(timeSelector);
+    const element = await elements[seance.nth];
+    const is_disabled =
+      (await getElementAttribute(element, "disable")) !== null;
+    expect(is_disabled, "Seance is disabled").to.be.false;
+    await this.page.click(selector);
+    return new ChairsChoicePage(this.page, seance);
+  }
+
+  async getSeanceElement(seance) {
+    return (await this.page.$$(timeSelector))[seance.nth - 1];
+  }
+
+  async randomlySelectSeance(isAvailable) {
+    const seances = await this.getSeances(isAvailable);
+    expect(seances).not.to.be.empty;
+    const seanceCount = seances.length;
+    const num = getRndInteger(0, seanceCount - 1);
+    const element = await this.getSeanceElement(seances[num]);
+    await element.click();
+    return new ChairsChoicePage(this.page, seances[num]);
   }
 }
 
-module.exports = Home;
+module.exports = HomePage;
