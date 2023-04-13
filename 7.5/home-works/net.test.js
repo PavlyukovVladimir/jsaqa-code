@@ -17,19 +17,19 @@ describe("task1", () => {
   });
 
   test("Current day ticket booking", async () => {
-    await homePage.checkSelectedWeekDay();
     const chairsChoicePage = await homePage.randomlySelectSeance(true);
     await chairsChoicePage.checkPage();
+
     const chair = await chairsChoicePage.getRandomFreeChair();
     await chairsChoicePage.selectChairs(chair);
     const viewBookingPage = await chairsChoicePage.pressBookButton();
     await viewBookingPage.checkPage();
+    
     const qrPage = await viewBookingPage.pressBookButton();
     await qrPage.checkPage();
   });
 
   test("Not posible ticket booking for seances that have been started", async () => {
-    await homePage.checkSelectedWeekDay();
     const date = new Date();
     const timeNowStr = `${date.getHours()}:${date.getMinutes() + 1}`;
     const chairsChoicePage = await homePage.randomlySelectSeanceBeforeTime(
@@ -48,14 +48,18 @@ describe("task1", () => {
   });
 
   test("One of next days ticket booking", async () => {
+
     await homePage.randomlySelectWeekDay({ min: 2 });
     await homePage.checkSelectedWeekDay();
+
     const chairsChoicePage = await homePage.randomlySelectSeance(true);
     await chairsChoicePage.checkPage();
+
     const chair = await chairsChoicePage.getRandomFreeChair();
     await chairsChoicePage.selectChairs(chair);
     const viewBookingPage = await chairsChoicePage.pressBookButton();
     await viewBookingPage.checkPage();
+
     const qrPage = await viewBookingPage.pressBookButton();
     await qrPage.checkPage();
   });
