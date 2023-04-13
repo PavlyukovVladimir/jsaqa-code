@@ -2,7 +2,7 @@
 
 const { expect } = require("chai");
 const { getTextBySelector, getClassName } = require("../commands");
-const { boolFlagCheck } = require("../util");
+const { boolFlagCheck, getRndInteger } = require("../util");
 const ViewBookingPage = require("./view-booking.page");
 
 const movieTitleSelector = "h2.buying__info-title";
@@ -86,16 +86,15 @@ class ChairsChoice {
     return matrix;
   }
 
-  async _queryToMatrix({isDisable, isStandart, isVip, isTaken, isSelected}) {
+  async _queryToMatrix({ isDisable, isStandart, isVip, isTaken, isSelected }) {
     const matrix = await this.getAllChairs();
     const arr = [];
     const rowLength = matrix.length;
     for (let i = 0; i < rowLength; i++) {
       const row = matrix[i];
       const columnLength = row.length;
-      for (let j = 0; i < columnLength; j++) {
+      for (let j = 0; j < columnLength; j++) {
         const element = row[j];
-        console.log(`${i}/${j}`)
         let flag = true;
         flag = boolFlagCheck(flag, isDisable, element.isDisable);
         flag = boolFlagCheck(flag, isStandart, element.isStandart);
@@ -116,29 +115,31 @@ class ChairsChoice {
   }
 
   async selectChairs(chairs) {
-    async function selectElement(row, chairNum) {
-      const element = await this.getChair(row, chairNum);
-      const className = await getClassName(element);
-      await element.click();
-      await element.waitForSelector(className + "." + selectedClassName);
-    }
     if (Array.isArray(chairs)) {
       for (let chair of chairs) {
         const row = chair.row;
         const chairNum = chair.chair;
-        selectElement(row, chairNum);
+        this.selectElement(row, chairNum);
       }
     } else {
       const row = chairs.row;
       const chairNum = chairs.chair;
-      selectElement(row, chairNum);
+      this.selectElement(row, chairNum);
     }
+  }
+
+  async selectElement(row, chairNum) {
+    const element = await this.getChair(row, chairNum);
+    const className = await getClassName(element);
+    await element.click();
+    await element.waitForSelector("." + className + "." + selectedClassName);
+    console.log(className);
   }
 
   async getChair(rowNum, chairNum) {
     await this.page.waitForSelector(rowSelector);
-    const row = (await this.page.$$(rowSelector))[rowNum - 1];
-    return (await row.$$(chairSelector))[chairNum - 1];
+    const row = await (await this.page.$$(rowSelector))[rowNum - 1];
+    return await (await row.$$(chairSelector))[chairNum - 1];
   }
 
   async getRandomFreeChair() {
@@ -146,7 +147,7 @@ class ChairsChoice {
     expect(arr, "No free chairs")
       .to.be.an("array")
       .that.to.have.lengthOf.at.greaterThanOrEqual(1);
-    return shuffle(arr)[0];
+    return arr[getRndInteger(0, arr.length - 1)];
   }
 
   async pressBookButton() {

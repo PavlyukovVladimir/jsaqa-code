@@ -34,7 +34,7 @@ describe("task1", () => {
     await page.goto("http://qamid.tmweb.ru/client/index.php");
     await page.waitForSelector(".page-nav a");
     // (await page.$("")).getProperties()
-  });
+    });
 
   test("Current day ticket booking", async () => {
     // получить сеансы
@@ -192,7 +192,7 @@ describe("task1", () => {
     const homePage = new HomePage(page, "http://qamid.tmweb.ru/client/index.php");
     await homePage.goToPage();
     await homePage.checkPage();
-    // await homePage.randomlySelectWeekDay();
+    await homePage.randomlySelectWeekDay();
     await homePage.checkSelectedWeekDay();
     const chairsChoicePage = await homePage.randomlySelectSeance(true);
     await chairsChoicePage.checkPage();

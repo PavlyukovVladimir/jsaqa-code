@@ -42,13 +42,13 @@ class HomePage {
   async selectWeekDay(num) {
     await this.page.waitForSelector(pageNavigationSelector);
     const elements = await this.page.$$(pageNavigationSelector);
-    await elements[num].click();
+    await elements[num - 1].click();
     this.selectedWeekDayNumber = num;
     return this;
   }
 
   async randomlySelectWeekDay() {
-    const n = Math.floor(Math.random() * 7) + 1;
+    const n = getRndInteger(1, 7);
     await this.selectWeekDay(n);
     return this;
   }
