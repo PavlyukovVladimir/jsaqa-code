@@ -132,14 +132,16 @@ class ChairsChoice {
     const element = await this.getChair(row, chairNum);
     const className = await getClassName(element);
     await element.click();
-    await element.waitForSelector("." + className + "." + selectedClassName);
     console.log(className);
+    await element.waitForSelector(className + "." + selectedClassName);
+    console.log(await getClassName(element));
   }
 
   async getChair(rowNum, chairNum) {
     await this.page.waitForSelector(rowSelector);
-    const row = await (await this.page.$$(rowSelector))[rowNum - 1];
-    return await (await row.$$(chairSelector))[chairNum - 1];
+    const rows = await this.page.$$(rowSelector);
+    const row = await rows[rowNum - 1];
+    return (await row.$$(chairSelector))[chairNum - 1];
   }
 
   async getRandomFreeChair() {
