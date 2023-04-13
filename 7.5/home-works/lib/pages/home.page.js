@@ -3,9 +3,10 @@
 const { expect } = require("chai");
 var ChairsChoicePage = require("./chairs-choice.page");
 const { getTextBySelector, getText, getClassName } = require("../commands");
-const { boolFlagCheck, getRndInteger } = require("../util");
+const { boolFlagCheck, getRndInteger, hhmmToMinute } = require("../util");
 
-const pageNavigationSelector = ".page-nav a";
+const pageNavigationPrefix = "a:nth-child(";
+const pageNavigationSuffix = ")";
 const weekDaysSelector = ".page-nav__day";
 const selectedDayClassName = "page-nav__day_chosen";
 const currentDayClassName = "page-nav__day_today";
@@ -34,38 +35,59 @@ class HomePage {
   }
 
   async checkPage() {
-    await this.page.waitForSelector(pageNavigationSelector);
+    await this.page.waitForSelector(
+      pageNavigationPrefix + 1 + pageNavigationSuffix
+    );
     expect(await this.page.$$(weekDaysSelector)).to.have.lengthOf(7);
     return this;
   }
 
   async selectWeekDay(num) {
-    await this.page.waitForSelector(pageNavigationSelector);
-    const elements = await this.page.$$(pageNavigationSelector);
-    await elements[num - 1].click();
+    const selector = pageNavigationPrefix + num + pageNavigationSuffix;
+    await this.page.waitForSelector(selector);
     this.selectedWeekDayNumber = num;
+    await this.page.click(selector);
     return this;
   }
 
-  async randomlySelectWeekDay() {
-    const n = getRndInteger(1, 7);
+  async randomlySelectWeekDay(arg) {
+    if (arg === undefined) {
+      arg = { min: 1, max: 7 };
+    }
+    let min = arg.min;
+    let max = arg.max;
+
+    if (min === undefined) {
+      min = 1;
+    }
+    if (max === undefined) {
+      max = 7;
+    }
+    expect(Number.isInteger(min)).to.be.true;
+    expect(Number.isInteger(min)).to.be.true;
+    expect(min).to.greaterThanOrEqual(1);
+    expect(max).to.lessThanOrEqual(7);
+    expect(min).to.lessThanOrEqual(max);
+    const n = getRndInteger(min, max);
     await this.selectWeekDay(n);
     return this;
   }
 
   async checkSelectedWeekDay() {
-    await this.page.waitForSelector(pageNavigationSelector);
-    const elements = await this.page.$$(pageNavigationSelector);
-    const element = await elements[this.selectedWeekDayNumber - 1];
+    const num = this.selectedWeekDayNumber;
+    const selector = pageNavigationPrefix + num + pageNavigationSuffix;
+    await this.page.waitForSelector(selector);
+    const element = await this.page.$(selector);
     const className = await getClassName(element);
     expect(className).to.contain(selectedDayClassName);
     return this;
   }
 
   async checkCurrentWeekDay() {
-    await this.page.waitForSelector(pageNavigationSelector);
-    const elements = await this.page.$$(pageNavigationSelector);
-    const element = await elements[this.selectedWeekDayNumber - 1];
+    const num = this.selectedWeekDayNumber;
+    const selector = pageNavigationPrefix + num + pageNavigationSuffix;
+    await this.page.waitForSelector(selector);
+    const element = await this.page.$(selector);
     const className = await getClassName(element);
     expect(className).to.contain(currentDayClassName);
     return this;
@@ -111,15 +133,18 @@ class HomePage {
     return arr;
   }
 
-  async selectSeanceWithDisableCheck(seance) {
-    await this.page.waitForSelector(timeSelector);
-    const elements = await this.page.$$(timeSelector);
-    const element = await elements[seance.nth];
-    const is_disabled =
-      (await getElementAttribute(element, "disable")) !== null;
-    expect(is_disabled, "Seance is disabled").to.be.false;
-    await this.page.click(selector);
-    return new ChairsChoicePage(this.page, seance);
+  async randomlySelectSeanceBeforeTime(timeStr) {
+    const seances = await this.getSeances("all");
+    expect(seances).not.to.be.empty;
+    const targetSeances = seances.filter(
+      (seance) => hhmmToMinute(seance.timeStr) < hhmmToMinute(timeStr)
+    );
+    expect(targetSeances).not.to.be.empty;
+    const targetSeancesCount = targetSeances.length;
+    const num = getRndInteger(0, targetSeancesCount - 1);
+    const element = await this.getSeanceElement(targetSeances[num]);
+    await element.click();
+    return new ChairsChoicePage(this.page, seances[num]);
   }
 
   async getSeanceElement(seance) {

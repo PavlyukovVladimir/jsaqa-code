@@ -8,9 +8,9 @@ const ViewBookingPage = require("./view-booking.page");
 const movieTitleSelector = "h2.buying__info-title";
 const movieStartSelector = "p.buying__info-start";
 const hallTitleSelector = "p.buying__info-hall";
-const rowSelector = ".buying-scheme__row";
+const rowSelector = "div.buying-scheme__row";
 
-const chairSelector = ".buying-scheme__chair";
+const chairSelector = "span.buying-scheme__chair";
 
 const vipClassName = "buying-scheme__chair_vip";
 const standartClassName = "buying-scheme__chair_standart";
@@ -30,8 +30,13 @@ class ChairsChoice {
     this.seance = seance;
   }
 
-  async checkPage() {
-    await this.page.waitForSelector(rowSelector);
+  async checkPage(time) {
+    const timeoutNow = this.page.getDefaultTimeout();
+    if (time === undefined || !Number.isInteger(time)) {
+      time = timeoutNow;
+    }
+
+    await this.page.waitForSelector(rowSelector, { timeout: time });
 
     const actualMovieTitle = await getTextBySelector(
       this.page,
@@ -50,6 +55,7 @@ class ChairsChoice {
       movieStartSelector
     );
     expect(actualTimeStr).contain(`Начало сеанса: ${this.seance.timeStr}`);
+    return this;
   }
 
   async getAllChairs() {
@@ -119,29 +125,26 @@ class ChairsChoice {
       for (let chair of chairs) {
         const row = chair.row;
         const chairNum = chair.chair;
-        this.selectElement(row, chairNum);
+        await this.selectElement(row, chairNum);
       }
     } else {
       const row = chairs.row;
       const chairNum = chairs.chair;
-      this.selectElement(row, chairNum);
+      await this.selectChair(row, chairNum);
     }
+    return this;
   }
 
-  async selectElement(row, chairNum) {
-    const element = await this.getChair(row, chairNum);
-    const className = await getClassName(element);
-    await element.click();
-    console.log(className);
-    await element.waitForSelector(className + "." + selectedClassName);
-    console.log(await getClassName(element));
-  }
-
-  async getChair(rowNum, chairNum) {
-    await this.page.waitForSelector(rowSelector);
-    const rows = await this.page.$$(rowSelector);
-    const row = await rows[rowNum - 1];
-    return (await row.$$(chairSelector))[chairNum - 1];
+  async selectChair(rowNum, chairNum) {
+    const selector =
+      rowSelector +
+      `:nth-child(${rowNum}) ` +
+      chairSelector +
+      `:nth-child(${chairNum})`;
+    await this.page.waitForSelector(selector);
+    await this.page.click(selector);
+    await this.page.waitForSelector(selector + "." + selectedClassName);
+    return this;
   }
 
   async getRandomFreeChair() {
@@ -155,7 +158,7 @@ class ChairsChoice {
   async pressBookButton() {
     await this.page.waitForSelector(bookButtonSelector);
     const is_disabled =
-      (await this.page.$(`${bookButtonSelector}[disabled]`)) !== null;
+      (await this.page.$(`${bookButtonSelector}[disabled=true]`)) !== null;
     expect(is_disabled, "Button is disabled").to.be.false;
     await this.page.click(bookButtonSelector);
     return new ViewBookingPage(this.page, this.seance);
